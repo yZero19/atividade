@@ -1,148 +1,254 @@
-using System;
-					
-public class Program
+<?php
+
+interface ICanal
 {
-	public static void Main()
-	{
-		Console.WriteLine("Hello World");
-		
-		ICanal whatsAppProfessor = new WhatsApp();
-		ICanal instaAluno = new Instagram();
-		
-		
-		MensagemBasica mensagem = new MensagemBasica();
-		mensagem.DataEnvio = DateTime.Now;
-		mensagem.Mensagem = "Olá";
-		
-		Video mensagemVideo =  new Video();
-		mensagem.DataEnvio = DateTime.Now;
-		mensagem.Mensagem = "Olá - Mensagem de vídeo";
-		mensagemVideo.Arquivo = "fim de semana.mp4";
-		mensagemVideo.Formato = TiposDeArquivo.MP3;
-		mensagemVideo.Duracao = 60;
-		
-		//Enviando mensagem básica
-		whatsAppProfessor.EnviarMensagem("+5511964687373", mensagem);
-		
-		//Enviando mensagem de vídeo
-		instaAluno.EnviarMensagem("+5511964687373", mensagemVideo);
-		
-		
-		MensagemMultimidia mensagemCaio = mensagemVideo;
-		mensagemCaio.Mensagem = "Olá, Caio!";
-		
-		ICanal facebook = new Facebook();
-		facebook.EnviarMensagem("usuarioDoCaio", mensagemCaio);
-			
-		ICanal canal = Factory.Create("facebook");
-		
-	}
+    public function enviarMensagemTexto(string $destinatario, MensagemTexto $mensagem);
+    public function enviarMensagemVideo(string $destinatario, MensagemVideo $mensagem);
+    public function enviarMensagemFoto(string $destinatario, MensagemFoto $mensagem);
+    public function enviarMensagemArquivo(string $destinatario, MensagemArquivo $mensagem);
 }
 
-public enum TiposDeArquivo
+class Factory
 {
-	MP3,
-	MP4,
-	PDF
+    public static function create(string $canal)
+    {
+        switch ($canal) {
+            case "whatsApp":
+                return new WhatsApp();
+            case "telegram":
+                return new Telegram();
+            case "instagram":
+                return new Instagram();
+            case "facebook":
+                return new Facebook();
+            default:
+                return null;
+        }
+    }
 }
 
-public static class Factory
+abstract class CanaisMensagem implements ICanal
 {
+    protected abstract function getCanal(): string;
 
-	public static ICanal Create(string canal)
-	{	
-		switch(canal)
-		{
-			case "whatsApp":
-				return new WhatsApp();
-			case "facebook":
-				return new Facebook();
-			default:
-			return null;
-			break;
-		};
-		return null;	
-	}
+    public function enviarMensagemTexto(string $destinatario, MensagemTexto $mensagem)
+    {
+        echo "Mensagem de texto enviada pelo canal: " . $this->getCanal() . "<br>";
+        echo "Destinatário: " . $destinatario . "<br>";
+        echo "Mensagem: " . $mensagem->getMensagem() . "<br>";
+        echo "Data Envio: " . $mensagem->getDataEnvio() . "<br><br>";
+    }
+
+    public function enviarMensagemVideo(string $destinatario, MensagemVideo $mensagem)
+    {
+        echo "Mensagem de vídeo enviada pelo canal: " . $this->getCanal() . "<br>";
+        echo "Destinatário: " . $destinatario . "<br>";
+        echo "Mensagem: " . $mensagem->getMensagem() . "<br>";
+        echo "Arquivo: " . $mensagem->getArquivo() . "<br>";
+        echo "Formato: " . $mensagem->getFormato() . "<br>";
+        echo "Duração: " . $mensagem->getDuracao() . "<br>";
+        echo "Data Envio: " . $mensagem->getDataEnvio() . "<br><br>";
+    }
+
+    public function enviarMensagemFoto(string $destinatario, MensagemFoto $mensagem)
+    {
+        echo "Mensagem de foto enviada pelo canal: " . $this->getCanal() . "<br>";
+        echo "Destinatário: " . $destinatario . "<br>";
+        echo "Mensagem: " . $mensagem->getMensagem() . "<br>";
+        echo "Arquivo: " . $mensagem->getArquivo() . "<br>";
+        echo "Formato: " . $mensagem->getFormato() . "<br>";
+        echo "Data Envio: " . $mensagem->getDataEnvio() . "<br><br>";
+    }
+
+    public function enviarMensagemArquivo(string $destinatario, MensagemArquivo $mensagem)
+    {
+        echo "Mensagem de arquivo enviada pelo canal: " . $this->getCanal() . "<br>";
+        echo "Destinatário: " . $destinatario . "<br>";
+        echo "Mensagem: " . $mensagem->getMensagem() . "<br>";
+        echo "Arquivo: " . $mensagem->getArquivo() . "<br>";
+        echo "Formato: " . $mensagem->getFormato() . "<br>";
+        echo "Data Envio: " . $mensagem->getDataEnvio() . "<br><br>";
+    }
 }
 
-public interface ICanal
+class WhatsApp extends CanaisMensagem
 {
-	void EnviarMensagem(string destinatario, MensagemBasica mensagem);
-	
-	void EnviarMensagem(string destinatario, MensagemMultimidia mensagem);
-	
-	void EnviarMensagem(string destinatario, Video mensagem);
+    protected function getCanal(): string
+    {
+        return "WhatsApp";
+    }
 }
 
-public abstract class CanaisMensagem : ICanal
+class Telegram extends CanaisMensagem
 {
-	protected abstract string canal {get;}
-	
-	public void EnviarMensagem(string destinatario, MensagemBasica mensagem)
-	{
-	
-	    Console.WriteLine("Mensagem básica enviada pelo canal: " + canal);
-		Console.WriteLine("Destinatário: "+ destinatario);
-		Console.WriteLine("Mensagem: "+ mensagem.Mensagem);
-		Console.WriteLine("Data Envio: "+ mensagem.DataEnvio);
-	}
-	
-	public void EnviarMensagem(string destinatario, MensagemMultimidia mensagem)
-	{
-	    Console.WriteLine("Mensagem multimidia enviada pelo canal: " + canal);
-		Console.WriteLine("Destinatário: "+ destinatario);
-		Console.WriteLine("Mensagem: "+ mensagem.Mensagem);
-		Console.WriteLine("Data Envio: "+ mensagem.DataEnvio);
-		Console.WriteLine("Arquivo: "+ mensagem.Arquivo);
-		Console.WriteLine("Tipo Arquivo: "+ mensagem.Formato);		
-	}
-	
-	public void EnviarMensagem(string destinatario, Video mensagem)
-	{
-	    Console.WriteLine("Mensagem video enviada pelo canal: " + canal);
-		Console.WriteLine("Destinatário: "+ destinatario);
-		Console.WriteLine("Mensagem: "+ mensagem.Mensagem);
-		Console.WriteLine("Data Envio: "+ mensagem.DataEnvio);
-		Console.WriteLine("Arquivo: "+ mensagem.Arquivo);
-		Console.WriteLine("Tipo Arquivo: "+ mensagem.Formato);	
-		Console.WriteLine("Duração: "+ mensagem.Duracao);	
-	}
+    protected function getCanal(): string
+    {
+        return "Telegram";
+    }
 }
 
-public class WhatsApp : CanaisMensagem, ICanal
+class Instagram extends CanaisMensagem
 {
-	protected override string canal { get {return "Whats APP";}}
+    protected function getCanal(): string
+    {
+        return "Instagram";
+    }
 }
 
-public class Telegram : CanaisMensagem, ICanal
+class Facebook extends CanaisMensagem
 {
-	protected override string canal { get {return "Telegram";}}
+    protected function getCanal(): string
+    {
+        return "Facebook";
+    }
 }
 
-public class Instagram : CanaisMensagem, ICanal
+class MensagemTexto
 {
-	protected override string canal { get {return "Instagram";}}
+    private $mensagem;
+    private $dataEnvio;
+
+    public function getMensagem(): string
+    {
+        return $this->mensagem;
+    }
+
+    public function setMensagem(string $mensagem)
+    {
+        $this->mensagem = $mensagem;
+    }
+
+    public function getDataEnvio()
+    {
+        return $this->dataEnvio;
+    }
+
+    public function setDataEnvio($dataEnvio)
+    {
+        $this->dataEnvio = $dataEnvio;
+    }
 }
 
-public class Facebook : CanaisMensagem, ICanal
+class MensagemVideo extends MensagemTexto
 {
-		protected override string canal { get {return "Facebook";}}
+    private $arquivo;
+    private $formato;
+    private $duracao;
+
+    public function getArquivo(): string
+    {
+        return $this->arquivo;
+    }
+
+    public function setArquivo(string $arquivo)
+    {
+        $this->arquivo = $arquivo;
+    }
+
+    public function getFormato(): string
+    {
+        return $this->formato;
+    }
+
+    public function setFormato(string $formato)
+    {
+        $this->formato = $formato;
+    }
+
+    public function getDuracao(): int
+    {
+        return $this->duracao;
+    }
+
+    public function setDuracao(int $duracao)
+    {
+        $this->duracao = $duracao;
+    }
 }
 
-
-public class MensagemBasica
+class MensagemFoto extends MensagemTexto
 {
-	public string Mensagem {get; set;}
-	public DateTime DataEnvio {get; set;}
+    private $arquivo;
+    private $formato;
+
+    public function getArquivo(): string
+    {
+        return $this->arquivo;
+    }
+
+    public function setArquivo(string $arquivo)
+    {
+        $this->arquivo = $arquivo;
+    }
+
+    public function getFormato(): string
+    {
+        return $this->formato;
+    }
+
+    public function setFormato(string $formato)
+    {
+        $this->formato = $formato;
+    }
 }
 
-public class MensagemMultimidia : MensagemBasica
+class MensagemArquivo extends MensagemTexto
 {
-	public string Arquivo {get; set;}
-	public TiposDeArquivo Formato {get; set;}
+    private $arquivo;
+    private $formato;
+
+    public function getArquivo(): string
+    {
+        return $this->arquivo;
+    }
+
+    public function setArquivo(string $arquivo)
+    {
+        $this->arquivo = $arquivo;
+    }
+
+    public function getFormato(): string
+    {
+        return $this->formato;
+    }
+
+    public function setFormato(string $formato)
+    {
+        $this->formato = $formato;
+    }
 }
 
-public class Video : MensagemMultimidia
-{
-	public int Duracao {get; set;}
-}
+$whatsAppProfessor = Factory::create("whatsApp");
+$telegramAluno = Factory::create("telegram");
+$instagramUsuario = Factory::create("instagram");
+$facebookUsuario = Factory::create("facebook");
+
+$mensagemTexto = new MensagemTexto();
+$mensagemTexto->setDataEnvio(date("Y-m-d H:i:s"));
+$mensagemTexto->setMensagem("Olá, isso é uma mensagem de texto!");
+
+$mensagemVideo = new MensagemVideo();
+$mensagemVideo->setDataEnvio(date("Y-m-d H:i:s"));
+$mensagemVideo->setMensagem("Vídeo interessante");
+$mensagemVideo->setArquivo("video.mp4");
+$mensagemVideo->setFormato("MP4");
+$mensagemVideo->setDuracao(120);
+
+$mensagemFoto = new MensagemFoto();
+$mensagemFoto->setDataEnvio(date("Y-m-d H:i:s"));
+$mensagemFoto->setMensagem("Foto bonita");
+$mensagemFoto->setArquivo("foto.jpg");
+$mensagemFoto->setFormato("JPEG");
+
+$mensagemArquivo = new MensagemArquivo();
+$mensagemArquivo->setDataEnvio(date("Y-m-d H:i:s"));
+$mensagemArquivo->setMensagem("Arquivo importante");
+$mensagemArquivo->setArquivo("documento.pdf");
+$mensagemArquivo->setFormato("PDF");
+
+
+$whatsAppProfessor->enviarMensagemTexto("+5511987654321", $mensagemTexto);
+$telegramAluno->enviarMensagemArquivo("@usuarioTelegram", $mensagemArquivo);
+$instagramUsuario->enviarMensagemFoto("@usuarioInstagram", $mensagemFoto);
+$facebookUsuario->enviarMensagemVideo("@usuarioFacebook", $mensagemVideo);
+?>
